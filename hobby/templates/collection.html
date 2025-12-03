@@ -1,0 +1,40 @@
+[file name]: collection.html (новый для Flask)
+[file content begin]
+{% extends "base.html" %}
+
+{% block title %}Моя коллекция - Генератор идей для хобби{% endblock %}
+
+{% block content %}
+<div class="collection-page">
+    <div class="container">
+        <div class="collection-header">
+            <h1 class="section-title">Моя коллекция</h1>
+            <p class="page-description">Все ваши сохраненные идеи для хобби</p>
+        </div>
+
+        <div id="collection-container">
+            <!-- Сохраненные хобби будут отображаться здесь -->
+            <div class="empty-collection" id="empty-collection">
+                <div class="empty-icon">
+                    <i class="fas fa-bookmark fa-3x"></i>
+                </div>
+                <h3>Ваша коллекция пуста</h3>
+                <p>Сохраняйте понравившиеся идеи хобби, нажимая на кнопку "Сохранить" на карточках</p>
+            </div>
+
+            <div class="ideas-grid" id="saved-hobbies-grid" style="display: none;">
+                <!-- Сохраненные карточки будут добавляться сюда -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCollectionFromStorage();
+    });
+</script>
+{% endblock %}
+[file content end]

@@ -86,14 +86,13 @@ def get_daily_challenge():
     return challenge
 
 
-# Главная страница с популярными идеями
 @app.route('/')
 def index():
     """Главная страница с популярными идеями"""
-    # Получаем 4 самые популярные идеи
+    # Получаем 12 самых популярных идей (было 4)
     popular_ideas = Idea.query.filter_by(is_approved=True) \
         .order_by(Idea.votes.desc()) \
-        .limit(4) \
+        .limit(12) \
         .all()
 
     ideas_data = [idea.to_dict() for idea in popular_ideas]
@@ -403,6 +402,10 @@ def generate_random():
                                has_ideas=True)
     return redirect(url_for('generate_idea'))
 
+@app.route('/collection')
+def collection():
+    """Страница коллекции пользователя"""
+    return render_template('collection.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

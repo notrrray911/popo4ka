@@ -49,13 +49,13 @@
         </div>
     </a>
 
-    <a href="{{ url_for('share') }}" class="feature-card-link">
+    <a href="{{ url_for('collection') }}" class="feature-card-link">
         <div class="feature-card">
             <div class="feature-icon">
-                <i class="fas fa-plus-circle"></i>
+                <i class="fas fa-bookmark"></i>
             </div>
-            <h3>Добавьте своё</h3>
-            <p>Поделитесь своей творческой идеей</p>
+            <h3>Коллекция</h3>
+            <p>Ваши сохраненные идеи хобби</p>
         </div>
     </a>
 </div>
@@ -63,12 +63,12 @@
 <!-- Популярные идеи - отдельный блок -->
 <div class="popular-ideas">
     <h2>Популярные идеи</h2>
-    <p class="section-description">Самые востребованные хобби от нашего сообщества</p>
+    <p class="section-description">Самые востребованные хобби от нашего сообщества </p>
 
     <div class="ideas-grid">
         {% if popular_ideas %}
             {% for idea in popular_ideas %}
-            <div class="idea-card">
+            <div class="idea-card" data-id="{{ loop.index }}">
                 <div class="idea-category">{{ idea.category }}</div>
                 <h4>{{ idea.title }}</h4>
                 <p class="idea-meta">
@@ -92,7 +92,7 @@
                         {% else %}{{ idea.location }}{% endif %}
                     </span>
                 </p>
-                <p class="idea-description">{{ idea.description[:120] }}...</p>
+                <p class="idea-description">{{ idea.description[:100] }}...</p>
                 <div class="idea-actions">
                     <button onclick="voteIdea({{ idea.id }})" class="btn-action small">
                         <i class="fas fa-heart"></i> {{ idea.votes }}
@@ -100,8 +100,8 @@
                     <a href="{{ url_for('generate_idea') }}?category={{ idea.category }}" class="btn-action small">
                         <i class="fas fa-random"></i> Подобные
                     </a>
-                    <button onclick="addToMyIdeas({{ idea.id }})" class="btn-action small">
-                        <i class="fas fa-bookmark"></i> Сохранить
+                    <button class="btn-action small save-btn">
+                        <i class="far fa-bookmark"></i> Сохранить
                     </button>
                 </div>
             </div>
@@ -123,89 +123,12 @@
     </div>
 </div>
 
-<!-- Статистика по категориям (опционально) -->
-{% if categories_stats %}
-<div class="categories-stats">
-    <h3>Идеи по категориям</h3>
-    <div class="categories-grid">
-        {% for category, count in categories_stats %}
-        <div class="category-badge">
-            <span class="category-name">{{ category }}</span>
-            <span class="category-count">{{ count }}</span>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endif %}
-{% endblock %}
-
 {% block scripts %}
 <script>
-    function voteIdea(ideaId) {
-        fetch(`/vote/${ideaId}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Находим кнопку с голосами и обновляем счетчик
-                    const buttons = document.querySelectorAll(`button[onclick*="voteIdea(${ideaId})"]`);
-                    buttons.forEach(btn => {
-                        const icon = btn.querySelector('i');
-                        const text = btn.textContent.trim();
-                        const currentVotes = parseInt(text.replace(/\D/g, ''));
-                        if (!isNaN(currentVotes)) {
-                            btn.innerHTML = `<i class="fas fa-heart"></i> ${currentVotes + 1}`;
-                        }
-                    });
-
-                    // Показываем уведомление
-                    showToast('Спасибо за ваш голос! ❤️', 'success');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                showToast('Произошла ошибка', 'error');
-            });
-    }
-
-    function addToMyIdeas(ideaId) {
-        fetch(`/add_to_my_ideas/${ideaId}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showToast('Идея добавлена в вашу коллекцию! 📚', 'success');
-                } else {
-                    showToast(data.message, 'info');
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                showToast('Произошла ошибка', 'error');
-            });
-    }
-
-    function showToast(message, type = 'info') {
-        // Создаем элемент уведомления
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        toast.innerHTML = `
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-            <span>${message}</span>
-        `;
-
-        document.body.appendChild(toast);
-
-        // Показываем
-        setTimeout(() => toast.classList.add('show'), 10);
-
-        // Убираем через 3 секунды
-        setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => {
-                if (toast.parentNode) {
-                    toast.parentNode.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
-    }
+    // Инициализация кнопок сохранения на главной странице
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация уже происходит в collection.js
+    });
 </script>
+{% endblock %}
 {% endblock %}
