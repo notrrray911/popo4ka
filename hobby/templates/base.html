@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Генератор идей для хобби{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="logo">
+                <i class="fas fa-lightbulb"></i> Идеи для хобби
+            </a>
+            <div class="nav-links">
+                <a href="{{ url_for('generate_idea') }}"><i class="fas fa-random"></i> Генератор</a>
+                <a href="{{ url_for('community') }}"><i class="fas fa-users"></i> Сообщество</a>
+                <a href="{{ url_for('my_ideas') }}"><i class="fas fa-heart"></i> Мои идеи</a>
+                <a href="{{ url_for('challenge') }}"><i class="fas fa-trophy"></i> Челлендж</a>
+                <a href="{{ url_for('add_idea') }}"><i class="fas fa-plus-circle"></i> Добавить</a>
+                <a href="{{ url_for('stats') }}"><i class="fas fa-chart-bar"></i> Статистика</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-circle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <p>Генератор идей для хобби </p>
+            <p>Победи прокрастинацию — начни творить!</p>
+            <p>При создании пары людей из БФБО-04-24</p>
+            <p>(>^_^)> <(^_^<)</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

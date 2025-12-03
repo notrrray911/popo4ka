@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Ежедневный челлендж - Генератор идей для хобби{% endblock %}
+
+{% block content %}
+<div class="challenge-page">
+    <h1>Ежедневный челлендж</h1>
+    <p class="page-description">Выполняйте ежедневные задания и побеждайте прокрастинацию!</p>
+
+    {% if challenge %}
+    <div class="challenge-card">
+        <div class="challenge-header">
+            <h2>Задание на {{ challenge.date }}</h2>
+            <span class="challenge-badge">
+                <i class="fas fa-trophy"></i> День {{ challenge.id }}
+            </span>
+        </div>
+
+        <div class="challenge-idea">
+            <h3>{{ challenge.idea.title }}</h3>
+            <p class="challenge-description">{{ challenge.idea.description }}</p>
+
+            <div class="idea-meta">
+                <span class="meta-item"><i class="fas fa-clock"></i>
+                    {% if challenge.idea.time_required == 'short' %}До 1 часа
+                    {% elif challenge.idea.time_required == 'medium' %}1-3 часа
+                    {% elif challenge.idea.time_required == 'long' %}Более 3 часов
+                    {% else %}{{ challenge.idea.time_required }}{% endif %}
+                </span>
+                <span class="meta-item"><i class="fas fa-wallet"></i>
+                    {% if challenge.idea.budget == 'free' %}Бесплатно
+                    {% elif challenge.idea.budget == 'low' %}Низкий
+                    {% elif challenge.idea.budget == 'medium' %}Средний
+                    {% elif challenge.idea.budget == 'high' %}Высокий
+                    {% else %}{{ challenge.idea.budget }}{% endif %}
+                </span>
+                <span class="meta-item"><i class="fas fa-map-marker-alt"></i>
+                    {% if challenge.idea.location == 'indoor' %}Дома
+                    {% elif challenge.idea.location == 'outdoor' %}На улице
+                    {% elif challenge.idea.location == 'both' %}Любое
+                    {% else %}{{ challenge.idea.location }}{% endif %}
+                </span>
+                <span class="meta-item"><i class="fas fa-signal"></i>
+                    {% if challenge.idea.difficulty == 'easy' %}Легкая
+                    {% elif challenge.idea.difficulty == 'medium' %}Средняя
+                    {% elif challenge.idea.difficulty == 'hard' %}Сложная
+                    {% else %}{{ challenge.idea.difficulty }}{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="challenge-stats">
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <div>
+                    <h4>Выполнили сегодня</h4>
+                    <p class="stat-number">{{ challenge.completed_count }} человек</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-actions">
+            <button onclick="completeChallenge({{ challenge.id }})" class="btn-primary btn-large">
+                <i class="fas fa-check-circle"></i> Я выполнил челлендж!
+            </button>
+            <button onclick="skipChallenge()" class="btn-secondary">
+                <i class="fas fa-redo"></i> Другое задание
+            </button>
+        </div>
+
+        <div class="challenge-tips">
+            <h4><i class="fas fa-lightbulb"></i> Советы по выполнению:</h4>
+            <ul>
+                <li>Выделите конкретное время для выполнения</li>
+                <li>Не стремитесь к идеалу - главное начать</li>
+                <li>Сделайте фото результата и сохраните на память</li>
+                <li>Поделитесь с друзьями для дополнительной мотивации</li>
+            </ul>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-challenge">
+        <i class="fas fa-calendar-plus fa-3x"></i>
+        <h3>Челлендж на сегодня еще не создан</h3>
+        <p>Попробуйте зайти чуть позже или создайте свой собственный челлендж!</p>
+        <div class="challenge-actions">
+            <a href="{{ url_for('generate_idea') }}" class="btn-primary">
+                <i class="fas fa-random"></i> Сгенерировать идею
+            </a>
+            <a href="{{ url_for('add_idea') }}" class="btn-secondary">
+                <i class="fas fa-plus-circle"></i> Добавить свою идею
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="previous-challenges">
+        <h3>Предыдущие челленджи</h3>
+        <p>Скоро здесь появятся выполненные задания...</p>
+        <p><em>Функция находится в разработке</em></p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function completeChallenge(challengeId) {
+        fetch(`/complete_challenge/${challengeId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Отлично! Челлендж выполнен!', 'success');
+                    // Обновляем счетчик
+                    const statElement = document.querySelector('.stat-number');
+                    if (statElement) {
+                        statElement.textContent = `${data.completed_count} человек`;
+                    }
+
+                    // Меняем кнопку
+                    const button = document.querySelector('.challenge-actions .btn-primary');
+                    if (button) {
+                        button.innerHTML = '<i class="fas fa-check-double"></i> Выполнено!';
+                        button.classList.remove('btn-primary');
+                        button.classList.add('btn-success');
+                        button.disabled = true;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
+            });
+    }
+
+    function skipChallenge() {
+        showToast('Новое задание будет доступно завтра!', 'info');
+    }
+</script>
+{% endblock %}

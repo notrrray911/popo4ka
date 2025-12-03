@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Генератор идей для хобби{% endblock %}
+
+{% block content %}
+<div class="ideas-page">
+    <h1>{{ title }}</h1>
+
+    {% if categories %}
+        <!-- Показываем идеи по категориям -->
+        {% for category, cat_ideas in categories.items() %}
+        <div class="category-section">
+            <h2 class="category-title">{{ category }}</h2>
+            <div class="ideas-grid">
+                {% for idea in cat_ideas %}
+                <div class="idea-card">
+                    <div class="idea-category">{{ idea.category }}</div>
+                    <h4>{{ idea.title }}</h4>
+                    <p class="idea-meta">
+                        <span><i class="fas fa-clock"></i>
+                            {% if idea.time_required == 'short' %}До 1 часа
+                            {% elif idea.time_required == 'medium' %}1-3 часа
+                            {% elif idea.time_required == 'long' %}Более 3 часов
+                            {% else %}{{ idea.time_required }}{% endif %}
+                        </span>
+                        <span><i class="fas fa-wallet"></i>
+                            {% if idea.budget == 'free' %}Бесплатно
+                            {% elif idea.budget == 'low' %}Низкий
+                            {% elif idea.budget == 'medium' %}Средний
+                            {% elif idea.budget == 'high' %}Высокий
+                            {% else %}{{ idea.budget }}{% endif %}
+                        </span>
+                        <span><i class="fas fa-map-marker-alt"></i>
+                            {% if idea.location == 'indoor' %}Дома
+                            {% elif idea.location == 'outdoor' %}На улице
+                            {% elif idea.location == 'both' %}Любое
+                            {% else %}{{ idea.location }}{% endif %}
+                        </span>
+                    </p>
+                    <p class="idea-description">{{ idea.description[:150] }}...</p>
+                    <div class="idea-actions">
+                        <button onclick="voteIdea({{ idea.id }})" class="btn-action small">
+                            <i class="fas fa-thumbs-up"></i> {{ idea.votes }}
+                        </button>
+                        <button onclick="addToMyIdeas({{ idea.id }})" class="btn-action small">
+                            <i class="fas fa-bookmark"></i> Сохранить
+                        </button>
+                        <button onclick="shareIdea({{ idea.id }})" class="btn-action small">
+                            <i class="fas fa-share-alt"></i> Поделиться
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    {% elif ideas %}
+        <!-- Показываем все идеи списком -->
+        <div class="ideas-grid">
+            {% for idea in ideas %}
+            <div class="idea-card">
+                <div class="idea-category">{{ idea.category }}</div>
+                <h4>{{ idea.title }}</h4>
+                <p class="idea-meta">
+                    <span><i class="fas fa-clock"></i>
+                        {% if idea.time_required == 'short' %}До 1 часа
+                        {% elif idea.time_required == 'medium' %}1-3 часа
+                        {% elif idea.time_required == 'long' %}Более 3 часов
+                        {% else %}{{ idea.time_required }}{% endif %}
+                    </span>
+                    <span><i class="fas fa-wallet"></i>
+                        {% if idea.budget == 'free' %}Бесплатно
+                        {% elif idea.budget == 'low' %}Низкий
+                        {% elif idea.budget == 'medium' %}Средний
+                        {% elif idea.budget == 'high' %}Высокий
+                        {% else %}{{ idea.budget }}{% endif %}
+                    </span>
+                    <span><i class="fas fa-map-marker-alt"></i>
+                        {% if idea.location == 'indoor' %}Дома
+                        {% elif idea.location == 'outdoor' %}На улице
+                        {% elif idea.location == 'both' %}Любое
+                        {% else %}{{ idea.location }}{% endif %}
+                    </span>
+                </p>
+                <p class="idea-description">{{ idea.description[:150] }}...</p>
+                <div class="idea-actions">
+                    <button onclick="voteIdea({{ idea.id }})" class="btn-action small">
+                        <i class="fas fa-thumbs-up"></i> {{ idea.votes }}
+                    </button>
+                    <button onclick="addToMyIdeas({{ idea.id }})" class="btn-action small">
+                        <i class="fas fa-bookmark"></i> Сохранить
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-ideas-message">
+            <i class="fas fa-inbox fa-3x"></i>
+            <h3>Пока нет сохраненных идей</h3>
+            <p>Найдите интересные идеи в <a href="{{ url_for('community') }}">сообществе</a> и сохраните их сюда!</p>
+            <a href="{{ url_for('community') }}" class="btn-primary">Посмотреть идеи сообщества</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function voteIdea(ideaId) {
+        fetch(`/vote/${ideaId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем счетчик
+                    const buttons = document.querySelectorAll(`button[onclick*="voteIdea(${ideaId})"]`);
+                    buttons.forEach(btn => {
+                        btn.innerHTML = `<i class="fas fa-thumbs-up"></i> ${data.votes}`;
+                    });
+                    showToast('Спасибо за ваш голос!', 'success');
+                }
+            });
+    }
+
+    function addToMyIdeas(ideaId) {
+        fetch(`/add_to_my_ideas/${ideaId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Идея добавлена в вашу коллекцию!', 'success');
+                } else {
+                    showToast(data.message, 'info');
+                }
+            });
+    }
+
+    function shareIdea(ideaId) {
+        // Простая реализация шаринга
+        if (navigator.share) {
+            navigator.share({
+                title: document.title,
+                text: 'Посмотрите эту интересную идею для хобби!',
+                url: window.location.href
+            });
+        } else {
+            // Копируем ссылку в буфер обмена
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                showToast('Ссылка скопирована в буфер обмена!', 'success');
+            });
+        }
+    }
+</script>
+{% endblock %}

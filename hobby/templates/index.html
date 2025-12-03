@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Генератор идей для хобби - Главная{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Не знаете, чем заняться?</h1>
+    <p class="subtitle">Наш генератор поможет найти идеальное хобби для любого настроения и возможностей</p>
+
+    <div class="hero-buttons">
+        <a href="{{ url_for('generate_idea') }}" class="btn-primary">
+            <i class="fas fa-random"></i> Сгенерировать идею
+        </a>
+        <a href="{{ url_for('challenge') }}" class="btn-secondary">
+            <i class="fas fa-trophy"></i> Ежедневный челлендж
+        </a>
+    </div>
+</div>
+
+<div class="features">
+    <a href="{{ url_for('filters_page') }}" class="feature-card-link">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-filter"></i>
+            </div>
+            <h3>Фильтры</h3>
+            <p>Подберите хобби по времени, бюджету и месту</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('community') }}" class="feature-card-link">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>Сообщество</h3>
+            <p>Коллекция идей от пользователей</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('challenge') }}" class="feature-card-link">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h3>Челленджи</h3>
+            <p>Ежедневные задания для вдохновения</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('share') }}" class="feature-card-link">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <h3>Добавьте своё</h3>
+            <p>Поделитесь своей творческой идеей</p>
+        </div>
+    </a>
+</div>
+
+<div class="popular-ideas">
+    <h2>Популярные идеи</h2>
+    <div class="ideas-grid">
+        {% if popular_ideas %}
+            {% for idea in popular_ideas %}
+            <div class="idea-card">
+                <div class="idea-category">{{ idea.category }}</div>
+                <h4>{{ idea.title }}</h4>
+                <p class="idea-meta">
+                    <span><i class="fas fa-clock"></i>
+                        {% if idea.time_required == 'short' %}До 1 часа
+                        {% elif idea.time_required == 'medium' %}1-3 часа
+                        {% elif idea.time_required == 'long' %}Более 3 часов
+                        {% else %}{{ idea.time_required }}{% endif %}
+                    </span>
+                    <span><i class="fas fa-wallet"></i>
+                        {% if idea.budget == 'free' %}Бесплатно
+                        {% elif idea.budget == 'low' %}Низкий
+                        {% elif idea.budget == 'medium' %}Средний
+                        {% elif idea.budget == 'high' %}Высокий
+                        {% else %}{{ idea.budget }}{% endif %}
+                    </span>
+                    <span><i class="fas fa-map-marker-alt"></i>
+                        {% if idea.location == 'indoor' %}Дома
+                        {% elif idea.location == 'outdoor' %}На улице
+                        {% elif idea.location == 'both' %}Любое
+                        {% else %}{{ idea.location }}{% endif %}
+                    </span>
+                </p>
+                <p class="idea-description">{{ idea.description[:100] }}...</p>
+                <div class="idea-actions">
+                    <button onclick="voteIdea({{ idea.id }})" class="btn-action small">
+                        <i class="fas fa-thumbs-up"></i> {{ idea.votes }}
+                    </button>
+                    <a href="{{ url_for('generate_idea') }}?category={{ idea.category }}" class="btn-action small">
+                        <i class="fas fa-random"></i> Подобные
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-ideas">
+                <p>Загрузка идей...</p>
+                <a href="{{ url_for('generate_idea') }}" class="btn-primary">Сгенерировать первую идею</a>
+            </div>
+        {% endif %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{{ url_for('all_ideas') }}" class="btn-link">
+            Смотреть все идеи <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function voteIdea(ideaId) {
+        fetch(`/vote/${ideaId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Находим кнопку с голосами и обновляем счетчик
+                    const buttons = document.querySelectorAll(`button[onclick*="${ideaId}"]`);
+                    buttons.forEach(btn => {
+                        const icon = btn.querySelector('i');
+                        const text = btn.textContent.trim();
+                        const currentVotes = parseInt(text.replace(/\D/g, ''));
+                        if (!isNaN(currentVotes)) {
+                            btn.innerHTML = `<i class="fas fa-thumbs-up"></i> ${currentVotes + 1}`;
+                        }
+                    });
+
+                    // Показываем уведомление
+                    showToast('Спасибо за ваш голос!', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
+            });
+    }
+
+    function showToast(message, type = 'info') {
+        // Создаем элемент уведомления
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Показываем
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Убираем через 3 секунды
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}
