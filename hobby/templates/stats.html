@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Статистика - Генератор идей для хобби{% endblock %}
+
+{% block content %}
+<div class="stats-page">
+    <h1>📊 Статистика сайта</h1>
+    <p class="page-description">Аналитика самых популярных хобби и активностей на нашем сайте</p>
+
+    {% if stats %}
+    <!-- Общая статистика -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-lightbulb fa-2x"></i>
+            </div>
+            <div class="stat-number">{{ stats.total_ideas }}</div>
+            <div class="stat-label">Всего идей</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-heart fa-2x"></i>
+            </div>
+            <div class="stat-number">{{ stats.total_votes }}</div>
+            <div class="stat-label">Всего голосов</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users fa-2x"></i>
+            </div>
+            <div class="stat-number">{{ stats.user_submitted }}</div>
+            <div class="stat-label">Идей от пользователей</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line fa-2x"></i>
+            </div>
+            <div class="stat-number">
+                {{ "%.1f"|format(stats.total_votes|float / stats.total_ideas) if stats.total_ideas > 0 else 0 }}
+            </div>
+            <div class="stat-label">Средний рейтинг</div>
+        </div>
+    </div>
+
+    <!-- Последние добавленные идеи -->
+    <div class="chart-container">
+        <h2><i class="fas fa-history"></i> Недавно добавленные идеи</h2>
+        <div class="recent-ideas-grid">
+            {% for idea in stats.recent_ideas %}
+            <div class="recent-idea-card">
+                <div class="recent-idea-category">{{ idea.category }}</div>
+                <h5>{{ idea.title }}</h5>
+                <p class="recent-idea-meta">
+                    <span><i class="fas fa-heart"></i> {{ idea.votes }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ idea.created_at }}</span>
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class="no-stats">
+        <i class="fas fa-chart-bar fa-3x"></i>
+        <h3>Статистика временно недоступна</h3>
+        <p>Попробуйте обновить страницу позже</p>
+        {% if error %}
+        <div class="error-message">
+            <p><strong>Ошибка:</strong> {{ error }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Анимация появления статистики
+    document.addEventListener('DOMContentLoaded', function() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        statNumbers.forEach(stat => {
+            const finalValue = parseInt(stat.textContent);
+            let currentValue = 0;
+            const increment = finalValue / 50;
+            const timer = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= finalValue) {
+                    stat.textContent = finalValue.toLocaleString();
+                    clearInterval(timer);
+                } else {
+                    stat.textContent = Math.floor(currentValue).toLocaleString();
+                }
+            }, 30);
+        });
+    });
+</script>
+{% endblock %}

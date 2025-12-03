@@ -17,6 +17,7 @@
     </div>
 </div>
 
+<!-- Четыре карточки в одном ряду -->
 <div class="features">
     <a href="{{ url_for('filters_page') }}" class="feature-card-link">
         <div class="feature-card">
@@ -59,8 +60,11 @@
     </a>
 </div>
 
+<!-- Популярные идеи - отдельный блок -->
 <div class="popular-ideas">
     <h2>Популярные идеи</h2>
+    <p class="section-description">Самые востребованные хобби от нашего сообщества</p>
+
     <div class="ideas-grid">
         {% if popular_ideas %}
             {% for idea in popular_ideas %}
@@ -88,30 +92,51 @@
                         {% else %}{{ idea.location }}{% endif %}
                     </span>
                 </p>
-                <p class="idea-description">{{ idea.description[:100] }}...</p>
+                <p class="idea-description">{{ idea.description[:120] }}...</p>
                 <div class="idea-actions">
                     <button onclick="voteIdea({{ idea.id }})" class="btn-action small">
-                        <i class="fas fa-thumbs-up"></i> {{ idea.votes }}
+                        <i class="fas fa-heart"></i> {{ idea.votes }}
                     </button>
                     <a href="{{ url_for('generate_idea') }}?category={{ idea.category }}" class="btn-action small">
                         <i class="fas fa-random"></i> Подобные
                     </a>
+                    <button onclick="addToMyIdeas({{ idea.id }})" class="btn-action small">
+                        <i class="fas fa-bookmark"></i> Сохранить
+                    </button>
                 </div>
             </div>
             {% endfor %}
         {% else %}
             <div class="no-ideas">
-                <p>Загрузка идей...</p>
-                <a href="{{ url_for('generate_idea') }}" class="btn-primary">Сгенерировать первую идею</a>
+                <i class="fas fa-search fa-2x"></i>
+                <h3>Загрузка идей...</h3>
+                <p>Попробуйте сгенерировать первую идею</p>
+                <a href="{{ url_for('generate_idea') }}" class="btn-primary mt-2">Сгенерировать идею</a>
             </div>
         {% endif %}
     </div>
+
     <div class="text-center mt-4">
         <a href="{{ url_for('all_ideas') }}" class="btn-link">
             Смотреть все идеи <i class="fas fa-arrow-right"></i>
         </a>
     </div>
 </div>
+
+<!-- Статистика по категориям (опционально) -->
+{% if categories_stats %}
+<div class="categories-stats">
+    <h3>Идеи по категориям</h3>
+    <div class="categories-grid">
+        {% for category, count in categories_stats %}
+        <div class="category-badge">
+            <span class="category-name">{{ category }}</span>
+            <span class="category-count">{{ count }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
@@ -122,18 +147,34 @@
             .then(data => {
                 if (data.success) {
                     // Находим кнопку с голосами и обновляем счетчик
-                    const buttons = document.querySelectorAll(`button[onclick*="${ideaId}"]`);
+                    const buttons = document.querySelectorAll(`button[onclick*="voteIdea(${ideaId})"]`);
                     buttons.forEach(btn => {
                         const icon = btn.querySelector('i');
                         const text = btn.textContent.trim();
                         const currentVotes = parseInt(text.replace(/\D/g, ''));
                         if (!isNaN(currentVotes)) {
-                            btn.innerHTML = `<i class="fas fa-thumbs-up"></i> ${currentVotes + 1}`;
+                            btn.innerHTML = `<i class="fas fa-heart"></i> ${currentVotes + 1}`;
                         }
                     });
 
                     // Показываем уведомление
-                    showToast('Спасибо за ваш голос!', 'success');
+                    showToast('Спасибо за ваш голос! ❤️', 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
+            });
+    }
+
+    function addToMyIdeas(ideaId) {
+        fetch(`/add_to_my_ideas/${ideaId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Идея добавлена в вашу коллекцию! 📚', 'success');
+                } else {
+                    showToast(data.message, 'info');
                 }
             })
             .catch(error => {

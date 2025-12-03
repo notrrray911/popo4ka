@@ -8,125 +8,199 @@
     <p class="page-description">Настройте фильтры и получите случайную идею для хобби</p>
 
     <div class="generate-container">
-        <!-- Форма фильтров -->
-        <div class="filters-card">
-            <h3><i class="fas fa-sliders-h"></i> Фильтры</h3>
-            <form id="filters-form" method="POST" action="{{ url_for('generate_idea') }}">
-                <div class="form-group">
-                    <label for="time"><i class="fas fa-clock"></i> Время</label>
-                    <select id="time" name="time" class="form-control">
-                        <option value="">Любое время</option>
-                        <option value="short" {% if filters.time == 'short' %}selected{% endif %}>До 1 часа</option>
-                        <option value="medium" {% if filters.time == 'medium' %}selected{% endif %}>1-3 часа</option>
-                        <option value="long" {% if filters.time == 'long' %}selected{% endif %}>Более 3 часов</option>
-                    </select>
+        <!-- Левая колонка: Фильтры -->
+        <div class="filters-section">
+            <div class="filters-card">
+                <div class="filters-header">
+                    <h3><i class="fas fa-sliders-h"></i> Фильтры</h3>
+                    <p class="filters-subtitle">Подберите хобби по времени, бюджету и месту</p>
                 </div>
 
-                <div class="form-group">
-                    <label for="budget"><i class="fas fa-wallet"></i> Бюджет</label>
-                    <select id="budget" name="budget" class="form-control">
-                        <option value="">Любой бюджет</option>
-                        <option value="free" {% if filters.budget == 'free' %}selected{% endif %}>Бесплатно</option>
-                        <option value="low" {% if filters.budget == 'low' %}selected{% endif %}>Низкий</option>
-                        <option value="medium" {% if filters.budget == 'medium' %}selected{% endif %}>Средний</option>
-                        <option value="high" {% if filters.budget == 'high' %}selected{% endif %}>Высокий</option>
-                    </select>
-                </div>
+                <form id="filters-form" method="POST" action="{{ url_for('generate_idea') }}">
+                    <div class="form-group">
+                        <label for="time"><i class="fas fa-clock"></i> Время</label>
+                        <select id="time" name="time" class="form-control">
+                            <option value="">Любое время</option>
+                            <option value="short" {% if filters.time == 'short' %}selected{% endif %}>До 1 часа</option>
+                            <option value="medium" {% if filters.time == 'medium' %}selected{% endif %}>1-3 часа</option>
+                            <option value="long" {% if filters.time == 'long' %}selected{% endif %}>Более 3 часов</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="location"><i class="fas fa-map-marker-alt"></i> Место</label>
-                    <select id="location" name="location" class="form-control">
-                        <option value="">Любое место</option>
-                        <option value="indoor" {% if filters.location == 'indoor' %}selected{% endif %}>Дома</option>
-                        <option value="outdoor" {% if filters.location == 'outdoor' %}selected{% endif %}>На улице</option>
-                        <option value="both" {% if filters.location == 'both' %}selected{% endif %}>Не важно</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="budget"><i class="fas fa-wallet"></i> Бюджет</label>
+                        <select id="budget" name="budget" class="form-control">
+                            <option value="">Любой бюджет</option>
+                            <option value="free" {% if filters.budget == 'free' %}selected{% endif %}>Бесплатно</option>
+                            <option value="low" {% if filters.budget == 'low' %}selected{% endif %}>Низкий (до 500 руб)</option>
+                            <option value="medium" {% if filters.budget == 'medium' %}selected{% endif %}>Средний (500-2000 руб)</option>
+                            <option value="high" {% if filters.budget == 'high' %}selected{% endif %}>Высокий (более 2000 руб)</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="category"><i class="fas fa-tags"></i> Категория</label>
-                    <select id="category" name="category" class="form-control">
-                        <option value="">Любая категория</option>
-                        {% for category in categories %}
-                        <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>{{ category }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="location"><i class="fas fa-map-marker-alt"></i> Место</label>
+                        <select id="location" name="location" class="form-control">
+                            <option value="">Любое место</option>
+                            <option value="indoor" {% if filters.location == 'indoor' %}selected{% endif %}>Дома</option>
+                            <option value="outdoor" {% if filters.location == 'outdoor' %}selected{% endif %}>На улице</option>
+                            <option value="both" {% if filters.location == 'both' %}selected{% endif %}>Не важно</option>
+                        </select>
+                    </div>
 
-                <div class="form-group">
-                    <label for="difficulty"><i class="fas fa-signal"></i> Сложность</label>
-                    <select id="difficulty" name="difficulty" class="form-control">
-                        <option value="">Любая сложность</option>
-                        <option value="easy" {% if filters.difficulty == 'easy' %}selected{% endif %}>Легкая</option>
-                        <option value="medium" {% if filters.difficulty == 'medium' %}selected{% endif %}>Средняя</option>
-                        <option value="hard" {% if filters.difficulty == 'hard' %}selected{% endif %}>Сложная</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label for="category"><i class="fas fa-tags"></i> Категория</label>
+                        <select id="category" name="category" class="form-control">
+                            <option value="">Любая категория</option>
+                            {% for category in categories %}
+                            <option value="{{ category }}" {% if filters.category == category %}selected{% endif %}>{{ category }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <button type="submit" class="btn-primary btn-block">
-                    <i class="fas fa-random"></i> Сгенерировать идею
-                </button>
-                <button type="button" id="random-btn" class="btn-secondary btn-block">
-                    <i class="fas fa-dice"></i> Полностью случайно
-                </button>
-            </form>
+                    <div class="form-group">
+                        <label for="difficulty"><i class="fas fa-signal"></i> Сложность</label>
+                        <select id="difficulty" name="difficulty" class="form-control">
+                            <option value="">Любая сложность</option>
+                            <option value="easy" {% if filters.difficulty == 'easy' %}selected{% endif %}>Легкая</option>
+                            <option value="medium" {% if filters.difficulty == 'medium' %}selected{% endif %}>Средняя</option>
+                            <option value="hard" {% if filters.difficulty == 'hard' %}selected{% endif %}>Сложная</option>
+                        </select>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit" class="btn-primary btn-block">
+                            <i class="fas fa-random"></i> Сгенерировать идею
+                        </button>
+                        <button type="button" id="random-btn" class="btn-secondary btn-block">
+                            <i class="fas fa-dice"></i> Полностью случайно
+                        </button>
+                        <button type="button" id="reset-btn" class="btn-action btn-block">
+                            <i class="fas fa-redo"></i> Сбросить фильтры
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <!-- Результат генерации -->
-        <div class="result-card">
-            <h3><i class="fas fa-lightbulb"></i> Случайная идея</h3>
+        <!-- Правая колонка: Результат -->
+        <div class="result-section">
+            <div class="result-card">
+                <div class="result-header">
+                    <h3><i class="fas fa-lightbulb"></i> Случайная идея</h3>
+                    {% if idea %}
+                    <div class="result-actions">
+                        <button onclick="shareIdea()" class="btn-action small">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                        <button onclick="saveAsImage()" class="btn-action small">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
 
-            {% if idea %}
-            <div class="idea-result">
-                <div class="idea-header">
-                    <span class="idea-category">{{ idea.category }}</span>
-                    <div class="idea-votes">
-                        <i class="fas fa-heart"></i> {{ idea.votes }}
+                {% if idea %}
+                <div class="idea-result" id="idea-result">
+                    <div class="idea-header">
+                        <span class="idea-category">{{ idea.category }}</span>
+                        <div class="idea-votes">
+                            <i class="fas fa-heart"></i> {{ idea.votes }}
+                        </div>
+                    </div>
+
+                    <h2 class="idea-title">{{ idea.title }}</h2>
+
+                    <div class="idea-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            {% if idea.time_required == 'short' %}До 1 часа
+                            {% elif idea.time_required == 'medium' %}1-3 часа
+                            {% elif idea.time_required == 'long' %}Более 3 часов
+                            {% endif %}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-wallet"></i>
+                            {% if idea.budget == 'free' %}Бесплатно
+                            {% elif idea.budget == 'low' %}Низкий
+                            {% elif idea.budget == 'medium' %}Средний
+                            {% elif idea.budget == 'high' %}Высокий
+                            {% endif %}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {% if idea.location == 'indoor' %}Дома
+                            {% elif idea.location == 'outdoor' %}На улице
+                            {% elif idea.location == 'both' %}Любое
+                            {% endif %}
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-signal"></i>
+                            {% if idea.difficulty == 'easy' %}Легкая
+                            {% elif idea.difficulty == 'medium' %}Средняя
+                            {% elif idea.difficulty == 'hard' %}Сложная
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="idea-description">
+                        <p>{{ idea.description }}</p>
+                    </div>
+
+                    <div class="idea-actions">
+                        <button onclick="voteIdea({{ idea.id }})" class="btn-action">
+                            <i class="fas fa-thumbs-up"></i> Нравится
+                        </button>
+                        <button onclick="addToMyIdeas({{ idea.id }})" class="btn-action">
+                            <i class="fas fa-bookmark"></i> Сохранить
+                        </button>
+                        <button onclick="generateNew()" class="btn-action">
+                            <i class="fas fa-redo"></i> Другая идея
+                        </button>
+                    </div>
+
+                    <div class="idea-footer">
+                        <small><i class="fas fa-calendar"></i> Добавлено: {{ idea.created_at }}</small>
                     </div>
                 </div>
 
-                <h2 class="idea-title">{{ idea.title }}</h2>
-
-                <div class="idea-meta">
-                    <span class="meta-item"><i class="fas fa-clock"></i> {{ idea.time_required }}</span>
-                    <span class="meta-item"><i class="fas fa-wallet"></i> {{ idea.budget }}</span>
-                    <span class="meta-item"><i class="fas fa-map-marker-alt"></i> {{ idea.location }}</span>
-                    <span class="meta-item"><i class="fas fa-signal"></i> {{ idea.difficulty }}</span>
-                </div>
-
-                <div class="idea-description">
-                    <p>{{ idea.description }}</p>
-                </div>
-
-                <div class="idea-actions">
-                    <button class="btn-action" onclick="voteIdea({{ idea.id }})">
-                        <i class="fas fa-thumbs-up"></i> Нравится
-                    </button>
-                    <button class="btn-action" onclick="addToMyIdeas({{ idea.id }})">
-                        <i class="fas fa-bookmark"></i> Сохранить
-                    </button>
-                    <button class="btn-action" onclick="generateNew()">
-                        <i class="fas fa-redo"></i> Другая идея
+                {% elif not has_ideas %}
+                <div class="no-ideas">
+                    <div class="no-ideas-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <h3>Нет идей по заданным фильтрам</h3>
+                    <p>Попробуйте изменить параметры поиска или сбросить фильтры</p>
+                    <button onclick="resetFilters()" class="btn-secondary">
+                        <i class="fas fa-redo"></i> Сбросить фильтры
                     </button>
                 </div>
 
-                <div class="idea-footer">
-                    <small>Добавлено: {{ idea.created_at }}</small>
+                {% else %}
+                <div class="waiting-for-idea">
+                    <div class="waiting-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Настройте фильтры и нажмите "Сгенерировать идею"</h3>
+                    <p>Или нажмите "Полностью случайно" для получения любой идеи</p>
+                    <div class="tips">
+                        <p><strong>Совет:</strong> Можно комбинировать несколько фильтров для точного поиска</p>
+                    </div>
                 </div>
+                {% endif %}
             </div>
 
-            {% elif not has_ideas %}
-            <div class="no-ideas">
-                <i class="fas fa-exclamation-triangle fa-3x"></i>
-                <h3>Нет идей по заданным фильтрам</h3>
-                <p>Попробуйте изменить параметры поиска</p>
-            </div>
-
-            {% else %}
-            <div class="waiting-for-idea">
-                <i class="fas fa-search fa-3x"></i>
-                <h3>Настройте фильтры и нажмите "Сгенерировать идею"</h3>
-                <p>Или нажмите "Полностью случайно" для получения любой идеи</p>
+            {% if idea %}
+            <div class="quick-actions">
+                <h4><i class="fas fa-bolt"></i> Быстрые действия</h4>
+                <div class="quick-buttons">
+                    <a href="{{ url_for('add_idea') }}" class="btn-action small">
+                        <i class="fas fa-plus"></i> Добавить похожую
+                    </a>
+                    <a href="{{ url_for('challenge') }}" class="btn-action small">
+                        <i class="fas fa-trophy"></i> Сделать челлендж
+                    </a>
+                </div>
             </div>
             {% endif %}
         </div>
@@ -136,34 +210,114 @@
 
 {% block scripts %}
 <script>
+    // Кнопка "Полностью случайно"
     document.getElementById('random-btn').addEventListener('click', function() {
         // Сброс всех фильтров
         document.getElementById('filters-form').reset();
         document.getElementById('filters-form').submit();
     });
 
-    function generateNew() {
-        // Генерация новой идеи с текущими фильтрами
+    // Кнопка сброса фильтров
+    document.getElementById('reset-btn').addEventListener('click', function() {
+        document.getElementById('filters-form').reset();
+    });
+
+    // Функция сброса фильтров
+    function resetFilters() {
+        document.getElementById('filters-form').reset();
         document.getElementById('filters-form').submit();
     }
 
+    // Генерация новой идеи с текущими фильтрами
+    function generateNew() {
+        document.getElementById('filters-form').submit();
+    }
+
+    // Голосование за идею
     function voteIdea(ideaId) {
         fetch(`/vote/${ideaId}`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Спасибо за ваш голос!');
-                    // Можно обновить счетчик на странице
+                    showToast('Спасибо за ваш голос! ❤️', 'success');
+                    // Обновляем счетчик
+                    const votesElement = document.querySelector('.idea-votes');
+                    if (votesElement) {
+                        votesElement.innerHTML = `<i class="fas fa-heart"></i> ${data.votes}`;
+                    }
                 }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
             });
     }
 
+    // Добавление в "Мои идеи"
     function addToMyIdeas(ideaId) {
         fetch(`/add_to_my_ideas/${ideaId}`, { method: 'POST' })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                showToast(data.message, data.success ? 'success' : 'info');
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showToast('Произошла ошибка', 'error');
             });
     }
+
+    // Поделиться идеей
+    function shareIdea() {
+        const ideaTitle = document.querySelector('.idea-title').textContent;
+        const text = `Посмотрите эту идею для хобби: "${ideaTitle}"`;
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Идея для хобби',
+                text: text,
+                url: window.location.href
+            });
+        } else {
+            navigator.clipboard.writeText(text + '\n' + window.location.href).then(() => {
+                showToast('Ссылка скопирована в буфер обмена! 📋', 'success');
+            });
+        }
+    }
+
+    // Сохранить как изображение (заглушка)
+    function saveAsImage() {
+        showToast('Функция сохранения в разработке 📸', 'info');
+    }
+
+    // Показ уведомлений
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(toast);
+
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Автоподсказки для фильтров
+    document.querySelectorAll('.form-control').forEach(select => {
+        select.addEventListener('change', function() {
+            this.style.borderColor = 'var(--primary-color)';
+            this.style.boxShadow = '0 0 0 2px rgba(138, 43, 226, 0.1)';
+        });
+    });
 </script>
 {% endblock %}

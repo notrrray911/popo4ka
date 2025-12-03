@@ -41,6 +41,7 @@ with app.app_context():
                 votes=22,
                 is_approved=True
             ),
+
             # ... остальные идеи из предыдущего кода
         ]
         db.session.add_all(initial_ideas)
